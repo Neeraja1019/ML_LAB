@@ -1,0 +1,470 @@
+# Face Recognition using LFW Dataset
+
+## Project Overview
+
+This project demonstrates **face recognition/classification** using the **Labeled Faces in the Wild (LFW)** dataset.
+
+The program explores multiple machine learning and deep learning techniques for recognizing faces:
+
+* K-Nearest Neighbors (KNN)
+* Principal Component Analysis (PCA)
+* MinMaxScaler
+* Artificial Neural Network using TensorFlow/Keras
+
+The LFW dataset contains face images of different people. The images are processed and classified based on the identity of the person.
+
+---
+
+##  Objective
+
+The main objective of this project is to perform **face classification** using facial image data.
+
+The program:
+
+1. Loads the LFW face dataset.
+2. Displays sample face images.
+3. Splits the dataset into training and testing sets.
+4. Selects a maximum of 50 images per person.
+5. Normalizes the image pixel values.
+6. Applies KNN classification.
+7. Reduces the dimensionality of the data using PCA.
+8. Applies KNN again using PCA features.
+9. Visualizes PCA components.
+10. Scales the PCA features using MinMaxScaler.
+11. Creates a neural network using TensorFlow/Keras.
+12. Evaluates the neural network on the test data.
+
+---
+
+## 🛠️ Technologies Used
+
+* Python
+* NumPy
+* Matplotlib
+* mglearn
+* TensorFlow
+* Scikit-learn
+* K-Nearest Neighbors (KNN)
+* Principal Component Analysis (PCA)
+* MinMaxScaler
+* TensorFlow/Keras Neural Network
+
+---
+
+##  Installation
+
+Install the required packages:
+
+```bash
+pip install mglearn
+pip install tensorflow
+```
+
+The program also requires Scikit-learn, NumPy, and Matplotlib.
+
+---
+
+##  Dataset
+
+The project uses the **Labeled Faces in the Wild (LFW)** dataset provided by Scikit-learn.
+
+The dataset is loaded using:
+
+```python
+people = fetch_lfw_people(
+    min_faces_per_person=20,
+    resize=0.7
+)
+```
+
+The parameter `min_faces_per_person=20` means that only people with at least 20 available face images are included.
+
+The program displays the shape of the dataset:
+
+```python
+print(people.data.shape)
+print(people.target.shape)
+```
+
+---
+
+## Visualizing Face Images
+
+The program displays sample images from the dataset:
+
+```python
+fix, axes = plt.subplots(
+    2, 5,
+    figsize=(15, 8),
+    subplot_kw={'xticks': (), 'yticks': ()}
+)
+
+for target, image, ax in zip(
+    people.target,
+    people.images,
+    axes.ravel()
+):
+    ax.imshow(image)
+    ax.set_title(people.target_names[target])
+
+plt.show()
+```
+
+This allows us to visually inspect the different people/classes in the dataset.
+
+---
+
+##  Train-Test Split
+
+The dataset is initially divided into training and testing sets:
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    people.data,
+    people.target,
+    test_size=0.2,
+    random_state=180
+)
+```
+
+Here:
+
+* `X_train` contains training images.
+* `X_test` contains testing images.
+* `y_train` contains training labels.
+* `y_test` contains testing labels.
+* `20%` of the data is used for testing.
+
+The target arrays are converted to integer type:
+
+```python
+y_train = y_train.astype(int)
+y_test = y_test.astype(int)
+```
+
+---
+
+##  Selecting Face Images
+
+The program creates a mask to select up to **50 images for each person**:
+
+```python
+mask = np.zeros(
+    people.target.shape,
+    dtype=np.bool_
+)
+
+for target in np.unique(people.target):
+    mask[np.where(people.target == target)[0][:50]] = True
+```
+
+The selected images and labels are stored as:
+
+```python
+X_people = people.data[mask]
+y_people = people.target[mask]
+```
+
+---
+
+##  Data Normalization
+
+The image pixel values are divided by 255:
+
+```python
+X_people = X_people / 255.0
+```
+
+This converts the pixel values to a range approximately between **0 and 1**, which makes the data more suitable for machine learning algorithms.
+
+---
+
+## K-Nearest Neighbors (KNN)
+
+A KNN classifier with one neighbor is created:
+
+```python
+knn = KNeighborsClassifier(n_neighbors=1)
+```
+
+The model is trained using the selected face images:
+
+```python
+knn.fit(X_train, y_train)
+```
+
+The test accuracy is calculated using:
+
+```python
+print(
+    "Test set score of 1 -nn:{:.2f}".format(
+        knn.score(X_test, y_test)
+    )
+)
+```
+
+This provides the classification accuracy of the KNN model before PCA dimensionality reduction.
+
+---
+
+## Principal Component Analysis (PCA)
+
+PCA is used to reduce the dimensionality of the facial image data.
+
+The program creates a PCA model with **100 components**:
+
+```python
+pca = PCA(
+    n_components=100,
+    whiten=True,
+    random_state=0
+).fit(X_train)
+```
+
+The training and testing data are transformed:
+
+```python
+X_train_pca = pca.transform(X_train)
+X_test_pca = pca.transform(X_test)
+```
+
+The shape of the transformed training data is displayed:
+
+```python
+print(
+    "X_train_pca.shape: {}".format(
+        X_train_pca.shape
+    )
+)
+```
+
+PCA reduces the large number of original image features to **100 principal components**.
+
+---
+
+##  KNN with PCA
+
+KNN is applied again after PCA transformation:
+
+```python
+knn = KNeighborsClassifier(n_neighbors=1)
+
+knn.fit(
+    X_train_pca,
+    y_train
+)
+```
+
+The test accuracy is then calculated:
+
+```python
+print(
+    "Test set accuracy: {:.2f}".format(
+        knn.score(X_test_pca, y_test)
+    )
+)
+```
+
+This allows us to compare KNN performance using the original image features with KNN using PCA-reduced features.
+
+---
+
+##  Visualizing PCA Components
+
+The PCA components are visualized as images:
+
+```python
+fix, axes = plt.subplots(
+    3, 5,
+    figsize=(15, 12),
+    subplot_kw={'xticks': (), 'yticks': ()}
+)
+
+for i, (component, ax) in enumerate(
+    zip(pca.components_, axes.ravel())
+):
+    ax.imshow(
+        component.reshape(image_shape),
+        cmap='viridis'
+    )
+    ax.set_title(
+        "{}. component".format(i + 1)
+    )
+
+plt.show()
+```
+
+These images represent the first principal components learned from the face dataset.
+
+---
+
+## Feature Scaling
+
+After PCA, the data is scaled using `MinMaxScaler`:
+
+```python
+scaler = MinMaxScaler()
+
+X_train_scaled = scaler.fit_transform(X_train_pca)
+X_test_scaled = scaler.transform(X_test_pca)
+```
+
+MinMaxScaler transforms the PCA features into a common numerical range.
+
+---
+
+##  Neural Network using TensorFlow/Keras
+
+A neural network is created using TensorFlow/Keras:
+
+```python
+model = Sequential([
+    Input(shape=(100,)),
+    Dense(300, activation='relu'),
+    Dense(100, activation='relu'),
+    Dense(
+        len(np.unique(y_train)),
+        activation='softmax'
+    )
+])
+```
+
+### Network Architecture
+
+```text
+Input Layer
+    ↓
+100 Features
+    ↓
+Dense Layer - 300 neurons - ReLU
+    ↓
+Dense Layer - 100 neurons - ReLU
+    ↓
+Output Layer - Number of Classes - Softmax
+```
+
+The model is compiled using:
+
+```python
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+```
+
+---
+
+## Model Evaluation
+
+The neural network is evaluated using:
+
+```python
+loss, accuracy = model.evaluate(
+    X_test_scaled,
+    y_test,
+    verbose=1
+)
+
+print("Test Loss:", loss)
+print("Test Accuracy:", accuracy)
+```
+
+The program outputs the test loss and test accuracy.
+
+---
+
+## Important Note
+
+In the current code, the neural network is **created and compiled but not trained**.
+
+Normally, the model should be trained using:
+
+```python
+model.fit(
+    X_train_scaled,
+    y_train,
+    epochs=...,
+    batch_size=...,
+    validation_split=...
+)
+```
+
+Since `model.fit()` is not present in the provided program, `model.evaluate()` evaluates the neural network **before it has learned from the training data**.
+
+Therefore, the neural network's reported accuracy should **not be considered a meaningful trained-model accuracy**.
+
+The KNN models, however, are actually trained using `knn.fit()` before their accuracy is calculated.
+
+---
+
+## Overall Workflow
+
+```text
+LFW Face Dataset
+       ↓
+Select Face Images
+       ↓
+Normalize Pixel Values
+       ↓
+Train-Test Split
+       ↓
+   ┌───────────────┐
+   │      KNN      │
+   └───────┬───────┘
+           ↓
+      Test Accuracy
+
+       ↓
+      PCA
+       ↓
+100 Principal Components
+       ↓
+   ┌───────────────┐
+   │   KNN + PCA   │
+   └───────┬───────┘
+           ↓
+      Test Accuracy
+
+       ↓
+  MinMaxScaler
+       ↓
+Neural Network
+       ↓
+   Evaluation
+```
+
+---
+
+##  Project Structure
+
+```text
+.
+├── face_recognition.ipynb
+└── README.md
+```
+
+> Change the notebook name above to match the actual filename in your GitHub repository.
+
+---
+
+##  Conclusion
+
+This project demonstrates different approaches to **face recognition using machine learning and deep learning**.
+
+KNN is first applied directly to the normalized facial image data. PCA is then used to reduce the dimensionality of the images, followed by another KNN classifier.
+
+Finally, the PCA features are scaled using MinMaxScaler and passed to a TensorFlow/Keras neural network.
+
+The project provides practical experience with:
+
+* Face image datasets
+* Data preprocessing
+* KNN classification
+* Dimensionality reduction using PCA
+* Feature scaling
+* Neural network architecture
+* Model evaluation
+
+**Note:** To obtain a meaningful neural network result, the model should be trained with `model.fit()` before calling `model.evaluate()`.
+
