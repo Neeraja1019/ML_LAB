@@ -1,0 +1,337 @@
+# Iris Dataset Classification using Decision Tree
+
+##  Project Overview
+
+This project demonstrates how to build a **Decision Tree Classifier** using the **Iris dataset** with Python and Scikit-learn.
+
+The program performs the following tasks:
+
+* Loads and explores the Iris dataset.
+* Checks for missing values and examines data types.
+* Generates descriptive statistics.
+* Visualizes relationships between features using a pair plot.
+* Splits the dataset into training and testing sets.
+* Trains a Decision Tree classification model.
+* Evaluates the model using a classification report.
+* Displays a confusion matrix.
+* Visualizes the trained Decision Tree.
+* Uses the trained model to predict the class of new Iris flower measurements.
+
+---
+
+## Dataset
+
+The **Iris dataset** contains measurements of Iris flowers belonging to three different species:
+
+* **Setosa**
+* **Versicolor**
+* **Virginica**
+
+### Features
+
+| Feature        | Description         |
+| -------------- | ------------------- |
+| `sepal_length` | Length of the sepal |
+| `sepal_width`  | Width of the sepal  |
+| `petal_length` | Length of the petal |
+| `petal_width`  | Width of the petal  |
+
+### Target
+
+`species` — the species/class of the Iris flower.
+
+---
+
+## Technologies Used
+
+* Python
+* Pandas
+* NumPy
+* Matplotlib
+* Seaborn
+* Scikit-learn
+* Graphviz
+* Pydotplus
+* Jupyter Notebook
+
+---
+
+##  Project Structure
+
+```text
+.
+├── Iris.csv
+├── exercise2a.png
+├── exercise2b.png
+├── iris_decision_tree.ipynb
+└── README.md
+```
+
+> File names can be changed according to the names used in your project.
+
+---
+
+##  Installation
+
+Install the required Python libraries using:
+
+```bash
+pip install pandas numpy matplotlib seaborn scikit-learn graphviz pydotplus
+```
+
+If you are using Jupyter Notebook, you can install the packages directly from a notebook cell:
+
+```python
+!pip install pydotplus
+!pip install graphviz
+```
+
+### Graphviz Setup
+
+If Graphviz is installed on Windows, add its `bin` directory to the system PATH.
+
+Example:
+
+```python
+import os
+os.environ["PATH"] += os.pathsep + r"C:\Program Files\Graphviz\bin"
+```
+
+Make sure the Graphviz installation path matches the location on your computer.
+
+---
+
+## 🔍 Dataset Exploration
+
+The dataset is loaded using Pandas:
+
+```python
+iris_df = pd.read_csv("Iris.csv")
+iris_df.head()
+```
+
+The program also checks for missing values:
+
+```python
+iris_df.isnull().any()
+```
+
+Data types are inspected using:
+
+```python
+iris_df.dtypes
+```
+
+Descriptive statistics are generated using:
+
+```python
+iris_df.describe()
+```
+
+---
+
+##  Data Visualization
+
+A pair plot is created to understand the relationships between the different features:
+
+```python
+sns.pairplot(iris_df, hue='species')
+plt.savefig("exercise2a.png")
+plt.show()
+```
+
+This visualization helps identify how the three Iris species differ based on their sepal and petal measurements.
+
+---
+
+##  Train-Test Split
+
+The features and target variable are separated:
+
+```python
+X = iris_df[['sepal_length', 'sepal_width',
+             'petal_length', 'petal_width']].values
+
+y = iris_df['species'].values
+```
+
+The dataset is then divided into training and testing sets:
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, train_size=0.9, random_state=1
+)
+```
+
+Here, **90% of the data is used for training** and **10% is used for testing**.
+
+---
+
+##  Decision Tree Classifier
+
+A Decision Tree Classifier is created and trained:
+
+```python
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(X_train, y_train)
+```
+
+The trained model is then used to predict the test data:
+
+```python
+prediction = clf.predict(X_test)
+```
+
+---
+
+##  Model Evaluation
+
+The model performance is evaluated using a classification report:
+
+```python
+print(classification_report(y_test, prediction))
+```
+
+The classification report provides metrics such as:
+
+* Precision
+* Recall
+* F1-score
+* Support
+
+---
+
+##  Confusion Matrix
+
+A confusion matrix is generated to visualize the model's classification performance:
+
+```python
+ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test)
+plt.savefig("exercise2b.png")
+plt.show()
+```
+
+The confusion matrix shows the number of correctly and incorrectly classified samples for each Iris species.
+
+---
+
+## Decision Tree Visualization
+
+The Decision Tree can also be visualized using Graphviz and Pydotplus:
+
+```python
+from io import StringIO
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+import pydotplus
+
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+clf = DecisionTreeClassifier(max_depth=3, random_state=42)
+clf.fit(X, y)
+
+dot_data = StringIO()
+
+export_graphviz(
+    clf,
+    out_file=dot_data,
+    feature_names=[
+        'sepal.length',
+        'sepal.width',
+        'petal.length',
+        'petal.width'
+    ],
+    filled=True,
+    rounded=True,
+    special_characters=True
+)
+
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+graph.write_png("exercise2b.png")
+```
+
+This produces a graphical representation of the decision-making process used by the classifier.
+
+---
+
+##  Prediction on New Data
+
+The trained classifier can be used to predict the species of a new Iris flower.
+
+Example input:
+
+```python
+SepalLengthCm = 4.8
+SepalWidthCm = 2.9
+PetalLengthCm = 1.3
+PetalWidthCm = 0.2
+```
+
+The values are passed to the classifier:
+
+```python
+x = [[
+    SepalLengthCm,
+    SepalWidthCm,
+    PetalLengthCm,
+    PetalWidthCm
+]]
+
+res = clf.predict(x)
+
+class_mapping = {
+    0: 'setosa',
+    1: 'versicolor',
+    2: 'virginica'
+}
+
+predicted_class = class_mapping[res[0]]
+
+print("The class predicted is --> " + predicted_class)
+```
+
+### Output
+
+```text
+The class predicted is --> setosa
+```
+
+---
+
+##  Output Visualizations
+
+### Pair Plot
+
+The pair plot shows the relationships between the sepal and petal features of the Iris dataset.
+
+![Pair Plot](exercise2a.png)
+
+### Confusion Matrix / Decision Tree
+
+![Decision Tree](exercise2b.png)
+
+---
+
+## Conclusion
+
+This project demonstrates the complete workflow of a **machine learning classification problem** using a Decision Tree.
+
+The workflow includes:
+
+1. Loading the dataset
+2. Exploring the data
+3. Visualizing feature relationships
+4. Splitting the data
+5. Training a Decision Tree model
+6. Making predictions
+7. Evaluating model performance
+8. Visualizing the confusion matrix and decision tree
+9. Predicting the class of new data
+
+The trained model successfully predicts the provided Iris flower measurements as **Setosa**.
+
+---
+
