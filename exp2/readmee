@@ -1,0 +1,270 @@
+# Spam Email Classification using SVM
+
+## 📌 Project Overview
+
+This project demonstrates **Spam and Ham message classification** using a **Support Vector Machine (SVM)** algorithm in Python.
+
+The program loads a spam message dataset, explores and visualizes the data, converts text messages into numerical features using `CountVectorizer`, trains an SVM classifier, and evaluates the model using its accuracy score.
+
+---
+
+##  Objective
+
+The main objective of this program is to classify messages into two categories:
+
+* **Spam** – unwanted or potentially fraudulent messages
+* **Ham** – legitimate/non-spam messages
+
+The project uses **Natural Language Processing (NLP)** techniques to convert text messages into numerical data that can be processed by a machine learning algorithm.
+
+---
+
+##  Technologies and Libraries Used
+
+* Python
+* NumPy
+* Pandas
+* Matplotlib
+* Seaborn
+* Scikit-learn
+* Support Vector Machine (SVM)
+* CountVectorizer
+
+---
+
+##  Dataset
+
+The program uses a CSV file named:
+
+```text
+spam.csv
+```
+
+The dataset contains two important columns:
+
+* `v1` – message category (`spam` or `ham`)
+* `v2` – text message
+
+The program renames these columns as:
+
+```text
+Category
+Message
+```
+
+---
+
+##  Program Workflow
+
+The project follows these steps:
+
+1. Import required libraries
+2. Load the spam dataset
+3. Explore the dataset
+4. Rename dataset columns
+5. Visualize Spam and Ham messages
+6. Split the dataset into training and testing sets
+7. Convert text into numerical features
+8. Train an SVM classifier
+9. Calculate the model accuracy
+
+---
+
+## Loading the Dataset
+
+The dataset is loaded using Pandas:
+
+```python
+dataset = pd.read_csv(
+    "C:\\User\\spam.csv",
+    encoding='latin-1'
+)
+```
+
+The dataset information is displayed using:
+
+```python
+dataset.info()
+```
+
+---
+
+##  Renaming the Columns
+
+If the original columns `v1` and `v2` are present, they are renamed:
+
+```python
+if 'v1' in dataset.columns and 'v2' in dataset.columns:
+    dataset = dataset.rename(
+        columns={
+            'v1': 'Category',
+            'v2': 'Message'
+        }
+    )
+```
+
+The first few rows are displayed using:
+
+```python
+dataset.head()
+```
+
+---
+
+##  Data Visualization
+
+A count plot is used to visualize the number of Spam and Ham messages:
+
+```python
+plt.figure(figsize=(6,4))
+sns.countplot(x='Category', data=dataset)
+plt.title("Spam and Ham Count")
+plt.xlabel("Category")
+plt.ylabel("Count")
+plt.savefig("exercise3a.png")
+plt.show()
+```
+
+The resulting graph is saved as:
+
+```text
+exercise3a.png
+```
+
+---
+
+##  Splitting the Dataset
+
+The dataset is divided into training and testing sets using `train_test_split()`.
+
+The program uses:
+
+* **80%** of the data for training
+* **20%** of the data for testing
+* `random_state=0`
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=0
+)
+```
+
+---
+
+##  Text Vectorization
+
+Machine learning algorithms cannot directly process raw text. Therefore, the messages are converted into numerical features using `CountVectorizer`.
+
+```python
+cv = CountVectorizer()
+
+X_train = cv.fit_transform(X_train)
+X_test = cv.transform(X_test)
+```
+
+`CountVectorizer` creates a numerical representation based on the frequency of words appearing in the messages.
+
+---
+
+##  Applying SVM Algorithm
+
+A Support Vector Machine classifier with an **RBF (Radial Basis Function) kernel** is created:
+
+```python
+classifier = SVC(
+    kernel='rbf',
+    random_state=0
+)
+```
+
+The classifier is then trained:
+
+```python
+classifier.fit(X_train, y_train)
+```
+
+---
+
+##  Checking Accuracy
+
+The model accuracy is calculated using:
+
+```python
+print(classifier.score(X_test, y_test))
+```
+
+### Output from the given program
+
+```text
+0.003587443946188341
+```
+
+This corresponds to an accuracy of approximately:
+
+```text
+0.36%
+```
+
+---
+
+##  Important Note About the Current Code
+
+There is a reversal in the assignment of the input and target variables in the provided program:
+
+```python
+X = dataset['Category'].values
+y = dataset['Message'].values
+```
+
+For a spam classification problem, the **message should be the input (`X`)** and the **category should be the target (`y`)**.
+
+The usual setup should be:
+
+```python
+X = dataset['Message'].values
+y = dataset['Category'].values
+```
+
+Then the text messages can be converted into numerical features using `CountVectorizer`, and the SVM can learn to classify them as Spam or Ham.
+
+Because the provided code uses the category as `X` and the message as `y`, the reported accuracy is extremely low.
+
+---
+
+##  Project Structure
+
+```text
+.
+├── spam.csv
+├── exercise3a.png
+├── spam_classification.ipynb
+└── README.md
+```
+
+> Rename the notebook filename in this structure if your actual file has a different name.
+
+---
+
+##  Output
+
+### Spam and Ham Count Plot
+
+![Spam and Ham Count](exercise3a.png)
+
+The graph displays the distribution of Spam and Ham messages in the dataset.
+
+---
+
+## 🏁 Conclusion
+
+This project demonstrates the basic process of **text classification using Machine Learning**.
+
+The program uses:
+
+**Text Data → CountVectorizer → SVM Classifier → Accuracy**
+
+The SVM algorithm is used to classify messages based on their text content. The current implementation produces a very low accuracy because the input and target columns are reversed. Correcting the assignment of `X` and `y` is necessary for the model to perform spam classification properly.
+
